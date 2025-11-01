@@ -351,10 +351,17 @@
             return hints;
         }
 
-        async function startScanner() {
+        function stopScanner() {
             if (codeReader) {
-                stopScanner();
+                codeReader.reset();
+                codeReader = null;
+                console.log("Scanner stopped and reset.");
             }
+        }
+
+        async function startScanner() {
+            // STOP 1: Stop any previous reader before initializing a new one
+            stopScanner(); 
 
             // A check to see if the library was successfully loaded
             if (typeof BrowserMultiFormatReader === 'undefined') {
@@ -365,21 +372,22 @@
             }
 
             // Prepare the reader with hints
-            // NOTE: We must use the ZXing.BarcodeFormat constants now.
             codeReader = new BrowserMultiFormatReader(getHints());
 
-            switchToView('scanner');
+            // Switch to scanner view (DOES NOT call stopScanner() anymore!)
+            switchToView('scanner'); 
 
             try {
                 const videoElement = document.getElementById('video-feed');
                 document.getElementById('scan-feedback').textContent = 'Starting camera...';
 
+                // This call should now succeed as codeReader is guaranteed to be an instance
                 await codeReader.decodeFromVideoDevice(null, videoElement, (result, error) => {
                     if (result) {
                         handleScanSuccess(result.text);
                     }
                     if (error && !(error instanceof MediaStreamTrack)) {
-                        // ZXing often reports this error as it scans multiple frames. We ignore it.
+                        // Ignore frequent internal ZXing errors
                     }
                 });
 
@@ -403,15 +411,9 @@
             }
         }
 
-        function stopScanner() {
-            if (codeReader) {
-                codeReader.reset();
-                codeReader = null;
-            }
-        }
-
         function handleScanSuccess(barcode) {
-            stopScanner();
+            // Explicitly stop scanner when we have a result
+            stopScanner(); 
             scannedBarcode = barcode;
             document.getElementById('scan-feedback').textContent = `Barcode Found: ${barcode}`;
 
@@ -427,7 +429,7 @@
         // --- UI & VIEW MANAGEMENT ---
 
         function switchToView(viewName, skipScanButton = false) {
-            stopScanner(); // Stop scanner every time view changes
+            // NOTE: Removed stopScanner() call here to fix the double-reset bug.
             const views = {
                 'scanner': document.getElementById('scanner-view'),
                 'form': document.getElementById('form-view'),
@@ -518,6 +520,8 @@
         }
 
         function displayPriceCheck(barcode) {
+             // We are leaving the scanner view, so stop it explicitly
+             stopScanner(); 
              switchToView('price-check-view', true);
              document.getElementById('check-barcode').textContent = barcode;
              const resultDisplay = document.getElementById('check-result');
@@ -550,6 +554,9 @@
 
         document.getElementById('product-form').addEventListener('submit', (e) => {
             e.preventDefault();
+            // We are leaving the scanner view, so stop it explicitly
+            stopScanner();
+            
             const form = e.target;
             const productData = {
                 docId: form.docId.value || null,
@@ -571,6 +578,8 @@
         });
 
         document.getElementById('cancel-button').addEventListener('click', () => {
+            // We are leaving the form/scanner view, so stop it explicitly
+            stopScanner();
             switchToView('list');
         });
 
@@ -614,7 +623,8 @@
             if (mode === 'manage') {
                 manageBtn.classList.add('bg-blue-600', 'active-mode');
                 checkBtn.classList.add('bg-gray-500');
-                // Switch to the list view immediately
+                // We are leaving the check/scanner view, so stop it explicitly
+                stopScanner(); 
                 switchToView('list');
             } else { // 'check' mode
                 checkBtn.classList.add('bg-blue-600', 'active-mode');
