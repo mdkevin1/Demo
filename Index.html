@@ -79,6 +79,15 @@
                         <input type="text" id="barcode" name="barcode" required readonly
                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3 bg-gray-100 cursor-not-allowed">
                     </div>
+                    
+                    <!-- NEW PRODUCT NAME FIELD -->
+                    <div>
+                        <label for="name" class="block text-sm font-medium text-gray-700">Product Name</label>
+                        <input type="text" id="name" name="name" required
+                               class="mt-1 block w-full rounded-md border border-gray-300 shadow-sm p-3 focus:ring-blue-500 focus:border-blue-500"
+                               placeholder="e.g., Organic Bananas, 24oz Can of Soda">
+                    </div>
+
                     <div>
                         <label for="size" class="block text-sm font-medium text-gray-700">Size/Unit (e.g., L, 500g, Pair)</label>
                         <input type="text" id="size" name="size" required
@@ -279,6 +288,7 @@
                     const newProduct = {
                         id: crypto.randomUUID(), // Generate a unique ID
                         barcode: productData.barcode,
+                        name: productData.name, // NEW FIELD
                         size: productData.size,
                         price: priceValue,
                         updatedAt: Date.now()
@@ -290,6 +300,7 @@
                     if (index !== -1) {
                         products[index] = {
                             ...products[index],
+                            name: productData.name, // UPDATED FIELD
                             size: productData.size,
                             price: priceValue,
                             updatedAt: Date.now()
@@ -466,6 +477,7 @@
                 currentDocId = existingProduct.id;
                 document.getElementById('docId').value = existingProduct.id;
                 document.getElementById('form-title').textContent = `Edit Existing Product: ${barcode}`;
+                document.getElementById('name').value = existingProduct.name || ''; // LOAD NEW FIELD
                 document.getElementById('size').value = existingProduct.size;
                 document.getElementById('price').value = existingProduct.price;
                 document.getElementById('save-button').textContent = 'Update Product';
@@ -492,6 +504,7 @@
             productsToRender.forEach(p => {
                 // p.updatedAt is a timestamp (number)
                 const date = p.updatedAt ? new Date(p.updatedAt).toLocaleString() : 'N/A';
+                const productName = p.name || 'Untitled Product';
 
                 const item = document.createElement('div');
                 item.className = 'product-item flex justify-between items-center p-4 bg-gray-50 rounded-lg shadow-sm border border-gray-200 transition hover:shadow-md';
@@ -503,7 +516,8 @@
 
                 item.innerHTML = `
                     <div>
-                        <p class="text-sm font-semibold text-gray-800 break-all">${p.barcode}</p>
+                        <p class="text-lg font-semibold text-gray-800">${productName}</p> <!-- DISPLAY NAME -->
+                        <p class="text-sm text-gray-600 break-all">Barcode: ${p.barcode}</p>
                         <p class="text-xs text-gray-500">Size: ${p.size}</p>
                         <p class="text-xs text-gray-500">Last updated: ${date}</p>
                     </div>
@@ -533,8 +547,11 @@
              if (product) {
                  const price = product.price;
                  const size = product.size;
+                 const name = product.name || 'Untitled Product';
+                 
                  resultDisplay.innerHTML = `
                     <div class="mt-4 p-4 bg-green-100 rounded-lg">
+                        <p class="text-xl font-extrabold text-green-800">${name}</p>
                         <p class="text-4xl font-extrabold text-green-700">$${parseFloat(price).toFixed(2)}</p>
                         <p class="text-lg text-gray-700 mt-1">Size/Unit: ${size}</p>
                     </div>
@@ -561,10 +578,16 @@
             const productData = {
                 docId: form.docId.value || null,
                 barcode: form.barcode.value.trim(),
+                name: form.name.value.trim(), // CAPTURE NEW FIELD
                 size: form.size.value.trim(),
                 price: parseFloat(form.price.value)
             };
 
+            // VALIDATION
+            if (!productData.name) {
+                 showModal('Input Error', 'Please enter a product name.', true);
+                 return;
+            }
             if (isNaN(productData.price) || productData.price < 0) {
                 showModal('Input Error', 'Please enter a valid price.', true);
                 return;
