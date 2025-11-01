@@ -151,9 +151,14 @@
         </div>
     </div>
 
-    <!-- ZXing Scripts -->
-    <script type="module">
-        import { BrowserMultiFormatReader, DecodeHintType } from 'https://cdn.jsdelivr.net/npm/@zxing/library@0.19.1/esm/index.js';
+    <!-- 1. ZXing Global Script (UMD) - FIX for CSP error -->
+    <script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.19.1/umd/index.min.js"></script>
+
+    <!-- 2. Application Logic (No 'type="module"' anymore) -->
+    <script>
+        // Access global ZXing properties now that the script is loaded
+        const BrowserMultiFormatReader = ZXing.BrowserMultiFormatReader;
+        const DecodeHintType = ZXing.DecodeHintType;
 
         // --- GLOBAL STATE & CONFIG ---
         let products = []; // Array to hold all products in memory
@@ -336,7 +341,12 @@
             const hints = new Map();
             // Focus on common formats for retail inventory
             hints.set(DecodeHintType.POSSIBLE_FORMATS, [
-                'EAN_13', 'EAN_8', 'UPC_A', 'UPC_E', 'CODE_128', 'CODE_39'
+                ZXing.BarcodeFormat.EAN_13, 
+                ZXing.BarcodeFormat.EAN_8, 
+                ZXing.BarcodeFormat.UPC_A, 
+                ZXing.BarcodeFormat.UPC_E, 
+                ZXing.BarcodeFormat.CODE_128, 
+                ZXing.BarcodeFormat.CODE_39
             ]);
             return hints;
         }
@@ -346,15 +356,16 @@
                 stopScanner();
             }
 
-            // A check to see if the library was successfully imported
+            // A check to see if the library was successfully loaded
             if (typeof BrowserMultiFormatReader === 'undefined') {
-                 showModal('Critical Error', 'Barcode scanning library failed to load. Check your hosting/internet connection or the module import.', true);
-                 console.error("BrowserMultiFormatReader is undefined. Check module import.");
+                 showModal('Critical Error', 'Barcode scanning library failed to load (ZXing not found). Check internet connection.', true);
+                 console.error("BrowserMultiFormatReader is undefined. Global ZXing object missing.");
                  switchToView('list');
                  return;
             }
 
             // Prepare the reader with hints
+            // NOTE: We must use the ZXing.BarcodeFormat constants now.
             codeReader = new BrowserMultiFormatReader(getHints());
 
             switchToView('scanner');
