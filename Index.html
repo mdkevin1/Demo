@@ -301,7 +301,18 @@
                 document.getElementById('scan-feedback').textContent = 'Scanning in progress...';
             } catch (err) {
                 console.error("Camera access failed:", err);
-                showModal('Camera Error', 'Could not access the camera. Ensure permissions are granted and no other app is using it.', true);
+                
+                // Enhanced error reporting for the user
+                let errorMessage = 'Could not access the camera. Check permissions and ensure no other app is using it.';
+                if (err.name === 'NotAllowedError' || err.name === 'SecurityError') {
+                    errorMessage = 'Camera access denied or blocked. This app must be served over HTTPS or localhost (e.g., http://127.0.0.1:8000) for security.';
+                } else if (err.name === 'NotFoundError') {
+                     errorMessage = 'No camera device found on this system.';
+                } else if (err.message && err.message.includes('permission denied')) {
+                     errorMessage = 'Camera permission was explicitly denied by the user or the browser.';
+                }
+                
+                showModal('Camera Error', errorMessage, true);
                 switchToView('list');
             }
         }
@@ -566,3 +577,4 @@
     </script>
 </body>
 </html>
+
