@@ -46,7 +46,6 @@
     <div id="app-container" class="max-w-4xl mx-auto bg-white p-6 rounded-xl shadow-2xl">
         <h1 class="text-3xl font-bold text-gray-800 mb-6 border-b pb-2">📦 Inventory Hub (Local)</h1>
 
-        <!-- Mode Selection -->
         <div id="mode-selector" class="flex flex-wrap gap-3 mb-6">
             <button id="mode-manage" class="mode-button bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition shadow-md active-mode">
                 Add / Edit Product
@@ -56,9 +55,7 @@
             </button>
         </div>
 
-        <!-- Main Content Area -->
         <div id="main-content">
-            <!-- 1. Scanner View -->
             <div id="scanner-view" class="mb-8 hidden">
                 <h2 class="text-xl font-semibold text-gray-700 mb-4">Scan Barcode</h2>
                 <div id="scanner-container">
@@ -70,7 +67,6 @@
                 </div>
             </div>
 
-            <!-- 2. Product Form View (Add/Edit) -->
             <div id="form-view" class="mb-8 hidden">
                 <h2 id="form-title" class="text-xl font-semibold text-gray-700 mb-4">Add New Product</h2>
                 <form id="product-form" class="space-y-4">
@@ -80,7 +76,6 @@
                                class="mt-1 block w-full rounded-md border-gray-300 shadow-sm p-3 bg-gray-100 cursor-not-allowed">
                     </div>
                     
-                    <!-- NEW PRODUCT NAME FIELD -->
                     <div>
                         <label for="name" class="block text-sm font-medium text-gray-700">Product Name</label>
                         <input type="text" id="name" name="name" required
@@ -111,40 +106,44 @@
                 </form>
             </div>
 
-            <!-- 3. Price Check Display -->
             <div id="price-check-view" class="mb-8 hidden text-center">
                 <div class="p-6 bg-yellow-50 rounded-xl shadow-inner">
                     <p class="text-2xl text-gray-600">Scanned Barcode:</p>
                     <p id="check-barcode" class="text-3xl font-mono font-bold text-gray-800 break-all my-3">---</p>
                     <div id="check-result">
-                        <!-- Content inserted here -->
-                    </div>
+                        </div>
                 </div>
                 <button id="rescan-button" class="mt-4 bg-purple-600 hover:bg-purple-700 text-white font-semibold py-3 px-6 rounded-lg shadow-lg transition">
                     Scan Next Item
                 </button>
             </div>
 
-            <!-- 4. Product List View (Management Mode Default) -->
             <div id="list-view" class="mb-8">
                 <h2 class="text-xl font-semibold text-gray-700 mb-4">Saved Products (<span id="product-count">0</span>)</h2>
                 <div id="product-list" class="space-y-3">
                     <p class="text-gray-500 text-center p-4" id="empty-message">No products saved yet. Scan a barcode to add the first one!</p>
-                    <!-- Products will be injected here -->
-                </div>
+                    </div>
                 <div class="mt-6 text-center">
                     <button id="start-scan-add" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg shadow-xl transition transform hover:scale-105">
                         <span class="text-lg">➕ Start Scan & Add New</span>
                     </button>
                 </div>
-            </div>
 
-            <!-- App ID Display -->
+                <div class="mt-4 flex flex-wrap gap-2 justify-center">
+                    <button id="export-data" class="bg-teal-500 hover:bg-teal-600 text-white font-semibold py-2 px-4 rounded-lg transition shadow-md">
+                        <span class="text-sm">📥 Export Data (JSON)</span>
+                    </button>
+                    <button id="import-data" class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-semibold py-2 px-4 rounded-lg transition shadow-md">
+                        <span class="text-sm">⬆️ Import Data (JSON)</span>
+                    </button>
+                    <input type="file" id="import-file-input" accept=".json" class="hidden">
+                </div>
+                </div>
+
             <div class="mt-8 p-3 bg-gray-100 rounded-lg text-xs text-gray-600">
                 <p><strong>App ID:</strong> <span id="display-app-id">inventory-manager-local</span> (Data is stored locally in your browser.)</p>
             </div>
 
-            <!-- Custom Modal (Used for Messages AND Confirmation) -->
             <div id="custom-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center p-4 z-50">
                 <div class="bg-white p-6 rounded-lg shadow-2xl max-w-sm w-full">
                     <h3 id="modal-title" class="text-lg font-bold mb-3">Message</h3>
@@ -160,10 +159,8 @@
         </div>
     </div>
 
-    <!-- 1. ZXing Global Script (UMD) - FIX for CSP error -->
     <script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.19.1/umd/index.min.js"></script>
 
-    <!-- 2. Application Logic (No 'type="module"' anymore) -->
     <script>
         // Access global ZXing properties now that the script is loaded
         const BrowserMultiFormatReader = ZXing.BrowserMultiFormatReader;
@@ -202,7 +199,8 @@
             document.getElementById('modal-close').classList.add('w-full');
             
             // Ensure the close button uses a standard color
-            document.getElementById('modal-close').className = `bg-${isError ? 'red' : 'blue'}-600 hover:bg-${isError ? 'red' : 'blue'}-700 text-white font-bold py-2 px-4 rounded-lg w-full`;
+            const buttonColor = isError ? 'red' : 'blue';
+            document.getElementById('modal-close').className = `bg-${buttonColor}-600 hover:bg-${buttonColor}-700 text-white font-bold py-2 px-4 rounded-lg w-full`;
 
             modal.classList.remove('hidden');
             modal.classList.add('flex');
@@ -226,6 +224,7 @@
             document.getElementById('modal-close').classList.add('hidden');
             document.getElementById('modal-confirm').classList.remove('hidden');
             document.getElementById('modal-cancel').classList.remove('hidden');
+            document.getElementById('modal-close').classList.remove('w-full'); // Reset close button width
 
             modal.classList.remove('hidden');
             modal.classList.add('flex');
@@ -293,7 +292,18 @@
                         price: priceValue,
                         updatedAt: Date.now()
                     };
-                    products.push(newProduct);
+                    // Check if barcode already exists for a new product, though the form logic handles this by pre-filling
+                    const existing = products.find(p => p.barcode === newProduct.barcode);
+                    if (existing) {
+                        // Switch to editing the existing product instead of adding a duplicate
+                        newProduct.id = existing.id;
+                        newProduct.updatedAt = Date.now();
+                        const index = products.findIndex(p => p.id === existing.id);
+                        products[index] = newProduct;
+                        isNew = false;
+                    } else {
+                        products.push(newProduct);
+                    }
                 } else {
                     // Update existing product
                     const index = products.findIndex(p => p.id === productData.docId);
@@ -346,6 +356,95 @@
             renderProductList(products);
         }
 
+        // --- NEW: EXPORT/IMPORT FUNCTIONS ---
+
+        function exportData() {
+            if (products.length === 0) {
+                showModal('Export Failed', 'There are no products to export.', true);
+                return;
+            }
+            
+            try {
+                const dataStr = JSON.stringify(products, null, 2);
+                const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                
+                const exportFileDefaultName = 'inventory_data.json';
+                
+                // Create a temporary link element to trigger the download
+                let linkElement = document.createElement('a');
+                linkElement.setAttribute('href', dataUri);
+                linkElement.setAttribute('download', exportFileDefaultName);
+                linkElement.click(); // Programmatically click the link to trigger download
+
+                showModal('Export Successful', `Exported ${products.length} products to ${exportFileDefaultName}.`, false);
+
+            } catch (e) {
+                console.error("Export Error:", e);
+                showModal('Export Error', 'An error occurred during data export.', true);
+            }
+        }
+
+        function importData() {
+            const fileInput = document.getElementById('import-file-input');
+            fileInput.click(); // Trigger the file selection dialog
+        }
+
+        document.getElementById('import-file-input').addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            if (file.type !== "application/json") {
+                showModal('Import Failed', 'Please select a valid JSON file.', true);
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const importedProducts = JSON.parse(e.target.result);
+
+                    if (!Array.isArray(importedProducts) || importedProducts.some(p => !p.barcode || p.price === undefined)) {
+                        showModal('Import Failed', 'The JSON file structure is invalid or missing required fields (barcode, price).', true);
+                        return;
+                    }
+                    
+                    showConfirm(
+                        'Confirm Import',
+                        `Are you sure you want to replace your current ${products.length} products with ${importedProducts.length} items from the imported file? This action is permanent.`,
+                        (confirmed) => {
+                            if (confirmed) {
+                                // Filter and sanitize imported data
+                                products = importedProducts.map(p => ({
+                                    ...p,
+                                    // Ensure proper types and fill missing fields
+                                    id: p.id || crypto.randomUUID(), 
+                                    name: p.name || 'Untitled Product',
+                                    size: p.size || 'N/A',
+                                    price: parseFloat(p.price) || 0,
+                                    updatedAt: p.updatedAt || Date.now()
+                                }));
+                                
+                                // Re-sort and save
+                                products.sort((a, b) => b.updatedAt - a.updatedAt); 
+                                saveProducts(products);
+                                renderProductList(products);
+                                showModal('Import Successful', `${products.length} products imported and saved successfully.`, false);
+                            }
+                        }
+                    );
+
+                } catch (error) {
+                    console.error("Import Parsing Error:", error);
+                    showModal('Import Error', 'Could not process the JSON file. It might be corrupt or malformed.', true);
+                }
+            };
+            reader.readAsText(file);
+            // Clear the file input so the same file can be selected again
+            event.target.value = null; 
+        });
+
+        // --- END NEW: EXPORT/IMPORT FUNCTIONS ---
+
         // --- BARCODE SCANNING FUNCTIONS (ZXING) ---
 
         function getHints() {
@@ -385,7 +484,7 @@
             // Prepare the reader with hints
             codeReader = new BrowserMultiFormatReader(getHints());
 
-            // Switch to scanner view (DOES NOT call stopScanner() anymore!)
+            // Switch to scanner view
             switchToView('scanner'); 
 
             try {
@@ -440,7 +539,6 @@
         // --- UI & VIEW MANAGEMENT ---
 
         function switchToView(viewName, skipScanButton = false) {
-            // NOTE: Removed stopScanner() call here to fix the double-reset bug.
             const views = {
                 'scanner': document.getElementById('scanner-view'),
                 'form': document.getElementById('form-view'),
@@ -516,8 +614,7 @@
 
                 item.innerHTML = `
                     <div>
-                        <p class="text-lg font-semibold text-gray-800">${productName}</p> <!-- DISPLAY NAME -->
-                        <p class="text-sm text-gray-600 break-all">Barcode: ${p.barcode}</p>
+                        <p class="text-lg font-semibold text-gray-800">${productName}</p> <p class="text-sm text-gray-600 break-all">Barcode: ${p.barcode}</p>
                         <p class="text-xs text-gray-500">Size: ${p.size}</p>
                         <p class="text-xs text-gray-500">Last updated: ${date}</p>
                     </div>
@@ -629,6 +726,10 @@
         document.getElementById('rescan-button').addEventListener('click', () => {
             startScanner();
         });
+
+        // NEW: Event listeners for Export/Import
+        document.getElementById('export-data').addEventListener('click', exportData);
+        document.getElementById('import-data').addEventListener('click', importData);
 
         // Mode switching logic (still uses localStorage)
         function setMode(mode) {
